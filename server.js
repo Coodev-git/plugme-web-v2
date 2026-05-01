@@ -547,7 +547,8 @@ app.get('/', (req, res) => res.json({ status: 'PlugMe API running', version: '1.
 
 // ── START ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-.then(async () => {
+mongoose.connect(process.env.MONGODB_URI)
+  .then(async () => {
     console.log('MongoDB connected');
     try {
       await mongoose.connection.db.collection('jobs').dropIndex('location_2dsphere');
