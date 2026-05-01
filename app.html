@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — NSUK PlugMe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ── SIDEBAR ─────────────────────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon">P</div>
+    <span class="logo-text">PlugMe</span>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebarAvatar">?</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarName">Loading…</div>
+      <span class="user-role" id="sidebarRole">—</span>
+    </div>
+  </div>
+
+  <!-- Student nav -->
+  <div class="nav-section" id="studentNav">
+    <div class="nav-label">Student</div>
+    <button class="nav-item active" onclick="showPage('browse')" id="nav-browse">
+      <span class="nav-icon">🔍</span> Browse Jobs
+    </button>
+    <button class="nav-item" onclick="showPage('postJob')" id="nav-postJob">
+      <span class="nav-icon">➕</span> Post a Job
+    </button>
+    <button class="nav-item" onclick="showPage('myJobs')" id="nav-myJobs">
+      <span class="nav-icon">📋</span> My Jobs
+    </button>
+    <button class="nav-item" onclick="showPage('workers')" id="nav-workers">
+      <span class="nav-icon">👥</span> Find Workers
+    </button>
+    <button class="nav-item" onclick="showPage('chats')" id="nav-chats-s">
+      <span class="nav-icon">💬</span> Chats
+      <span class="nav-badge" id="chatBadgeS" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('notifications')" id="nav-notifs-s">
+      <span class="nav-icon">🔔</span> Notifications
+      <span class="nav-badge" id="notifBadgeS" style="display:none">0</span>
+    </button>
+  </div>
+
+  <!-- Worker nav -->
+  <div class="nav-section" id="workerNav" style="display:none">
+    <div class="nav-label">Worker</div>
+    <button class="nav-item active" onclick="showPage('browse')" id="nav-browse-w">
+      <span class="nav-icon">🔍</span> Browse Jobs
+    </button>
+    <button class="nav-item" onclick="showPage('myOffers')" id="nav-myOffers">
+      <span class="nav-icon">📨</span> My Offers
+      <span class="nav-badge green" id="offerBadge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('chats')" id="nav-chats-w">
+      <span class="nav-icon">💬</span> Chats
+      <span class="nav-badge" id="chatBadgeW" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('notifications')" id="nav-notifs-w">
+      <span class="nav-icon">🔔</span> Notifications
+      <span class="nav-badge" id="notifBadgeW" style="display:none">0</span>
+    </button>
+  </div>
+
+  <div class="nav-section" style="margin-top:auto">
+    <button class="nav-item" onclick="showPage('profile')" id="nav-profile">
+      <span class="nav-icon">👤</span> Profile
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="btn-logout" onclick="logout()">
+      <span>🚪</span> Sign out
+    </button>
+  </div>
+</aside>
+
+<!-- ── MAIN CONTENT ──────────────────────────────────────────────────────────── -->
+<div class="main-content">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <span class="page-title" id="pageTitle">Browse Jobs</span>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
+        🔔
+        <span class="notif-dot" id="notifDot"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div class="content-area">
+
+    <!-- ── PAGE: BROWSE JOBS ─────────────────────────────────────────────────── -->
+    <div class="page active" id="page-browse">
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="jobSearchQ" placeholder="Search jobs…" oninput="debounceJobs()">
+        </div>
+        <select class="filter-select" id="jobCatFilter" onchange="loadJobs()">
+          <option value="">All Categories</option>
+          <option value="tech">💻 Tech Help</option>
+          <option value="delivery">🛵 Delivery</option>
+          <option value="laundry">👕 Laundry</option>
+          <option value="food">🍱 Food</option>
+          <option value="hair">✂️ Hair</option>
+          <option value="printing">🖨️ Printing</option>
+          <option value="tutoring">📚 Tutoring</option>
+          <option value="other">⚡ Other</option>
+        </select>
+      </div>
+      <div class="jobs-grid" id="browseJobsGrid">
+        <div class="loading-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: POST JOB ────────────────────────────────────────────────────── -->
+    <div class="page" id="page-postJob">
+      <div class="profile-card">
+        <div class="section-title" style="margin-bottom:20px">Post a New Job</div>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field-group">
+            <label>Job title *</label>
+            <input type="text" id="pjTitle" placeholder="e.g. Fix my laptop keyboard">
+          </div>
+          <div class="field-group">
+            <label>Category *</label>
+            <select id="pjCat">
+              <option value="">Select category…</option>
+              <option value="tech">💻 Tech Help</option>
+              <option value="delivery">🛵 Delivery</option>
+              <option value="laundry">👕 Laundry</option>
+              <option value="food">🍱 Food</option>
+              <option value="hair">✂️ Hair</option>
+              <option value="printing">🖨️ Printing</option>
+              <option value="tutoring">📚 Tutoring</option>
+              <option value="other">⚡ Other</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Description *</label>
+            <textarea id="pjDesc" placeholder="Describe what you need done, any requirements, etc." rows="4"></textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="field-group">
+              <label>Budget (₦) *</label>
+              <input type="number" id="pjBudget" placeholder="500">
+            </div>
+            <div class="field-group">
+              <label>Location</label>
+              <input type="text" id="pjLocation" placeholder="On Campus" value="On Campus">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="postJob()" id="postJobBtn">Post Job</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: MY JOBS ─────────────────────────────────────────────────────── -->
+    <div class="page" id="page-myJobs">
+      <div class="section-header">
+        <span class="section-title">My Posted Jobs</span>
+        <button class="btn-sm blue" onclick="showPage('postJob')">+ Post New</button>
+      </div>
+      <div class="jobs-grid" id="myJobsGrid">
+        <div class="loading-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: MY OFFERS (worker) ─────────────────────────────────────────── -->
+    <div class="page" id="page-myOffers">
+      <div class="section-header">
+        <span class="section-title">My Offers</span>
+      </div>
+      <div class="jobs-grid" id="myOffersGrid">
+        <div class="loading-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: FIND WORKERS ────────────────────────────────────────────────── -->
+    <div class="page" id="page-workers">
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="workerSearchQ" placeholder="Search workers by name…" oninput="debounceWorkers()">
+        </div>
+        <select class="filter-select" id="workerSkillFilter" onchange="loadWorkers()">
+          <option value="">All Skills</option>
+          <option value="tech">💻 Tech</option>
+          <option value="delivery">🛵 Delivery</option>
+          <option value="laundry">👕 Laundry</option>
+          <option value="food">🍱 Food</option>
+          <option value="hair">✂️ Hair</option>
+          <option value="printing">🖨️ Printing</option>
+          <option value="tutoring">📚 Tutoring</option>
+        </select>
+      </div>
+      <div class="workers-grid" id="workersGrid">
+        <div class="loading-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: CHATS ──────────────────────────────────────────────────────── -->
+    <div class="page" id="page-chats">
+      <div class="chat-layout" id="chatLayout">
+        <div class="chat-list" id="chatList">
+          <div class="chat-list-header">💬 Conversations</div>
+          <div id="chatListItems">
+            <div class="loading-wrap"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div class="chat-window" id="chatWindow">
+          <div class="chat-empty">
+            <div class="chat-empty-icon">💬</div>
+            <div style="font-weight:600; color:var(--text)">No chat selected</div>
+            <div style="font-size:13px">Pick a conversation from the left</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: NOTIFICATIONS ───────────────────────────────────────────────── -->
+    <div class="page" id="page-notifications">
+      <div class="section-header">
+        <span class="section-title">Notifications</span>
+        <button class="btn-sm outline" onclick="markAllRead()">Mark all read</button>
+      </div>
+      <div id="notifList">
+        <div class="loading-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: PROFILE ─────────────────────────────────────────────────────── -->
+    <div class="page" id="page-profile">
+      <div class="profile-card">
+        <div class="profile-hero">
+          <div class="profile-avatar" id="profileAvatar">?</div>
+          <div>
+            <div class="profile-name" id="profileName">—</div>
+            <div class="profile-email" id="profileEmail">—</div>
+            <div class="profile-rating" id="profileRating"></div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field-group">
+            <label>Full name</label>
+            <input type="text" id="profName">
+          </div>
+          <div class="field-group">
+            <label>Phone number</label>
+            <input type="tel" id="profPhone">
+          </div>
+          <div class="field-group">
+            <label>Bio</label>
+            <textarea id="profBio" rows="3" placeholder="Tell people about yourself…"></textarea>
+          </div>
+          <div class="field-group" id="profSkillsWrap" style="display:none">
+            <label>Your skills</label>
+            <div class="skills-grid" id="profSkillsGrid">
+              <span class="skill-chip" data-skill="tech" onclick="toggleProfSkill(this)">💻 Tech Help</span>
+              <span class="skill-chip" data-skill="delivery" onclick="toggleProfSkill(this)">🛵 Delivery</span>
+              <span class="skill-chip" data-skill="laundry" onclick="toggleProfSkill(this)">👕 Laundry</span>
+              <span class="skill-chip" data-skill="food" onclick="toggleProfSkill(this)">🍱 Food</span>
+              <span class="skill-chip" data-skill="hair" onclick="toggleProfSkill(this)">✂️ Hair</span>
+              <span class="skill-chip" data-skill="printing" onclick="toggleProfSkill(this)">🖨️ Printing</span>
+              <span class="skill-chip" data-skill="tutoring" onclick="toggleProfSkill(this)">📚 Tutoring</span>
+              <span class="skill-chip" data-skill="other" onclick="toggleProfSkill(this)">⚡ Other</span>
+            </div>
+          </div>
+          <div id="profAvailWrap" style="display:none">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text)">
+              <input type="checkbox" id="profAvail" style="width:16px; height:16px; cursor:pointer;">
+              Available for work
+            </label>
+          </div>
+          <button class="btn-primary" onclick="saveProfile()" id="saveProfileBtn">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /main-content -->
+
+<!-- ── NOTIFICATION PANEL ───────────────────────────────────────────────────── -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-header">
+    <span class="notif-panel-title">🔔 Notifications</span>
+    <span class="notif-mark-read" onclick="markAllRead()">Mark all read</span>
+  </div>
+  <div id="notifPanelItems"></div>
+</div>
+
+<!-- ── TOAST CONTAINER ──────────────────────────────────────────────────────── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ── MODAL: OFFER SUBMISSION ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="offerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Make an Offer</span>
+      <button class="modal-close" onclick="closeModal('offerModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="offerJobInfo" style="background:var(--bg); border-radius:var(--radius-sm); padding:14px; font-size:14px; color:var(--muted);"></div>
+      <div class="field-group">
+        <label>Your price (₦) *</label>
+        <input type="number" id="offerPrice" placeholder="e.g. 800">
+      </div>
+      <div class="field-group">
+        <label>Message to student</label>
+        <textarea id="offerMessage" placeholder="Why should they choose you? Mention experience, etc." rows="3"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Estimated time</label>
+        <input type="text" id="offerEta" placeholder="e.g. 2 hours, Same day">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('offerModal')">Cancel</button>
+      <button class="btn-primary green" onclick="submitOffer()" id="submitOfferBtn">Submit Offer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: VIEW OFFERS (student) ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="offersModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Offers Received</span>
+      <button class="modal-close" onclick="closeModal('offersModal')">✕</button>
+    </div>
+    <div class="modal-body" id="offersModalBody">
+      <div class="loading-wrap"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: JOB DETAIL ─────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="jobDetailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="jobDetailTitle">Job Details</span>
+      <button class="modal-close" onclick="closeModal('jobDetailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="jobDetailBody"></div>
+    <div class="modal-footer" id="jobDetailFooter"></div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentUser = null;
+let currentPage = 'browse';
+let activeJobId  = null; // for offer modal
+let activeChatId = null;
+let jobsDebounce, workersDebounce;
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  if (!PlugMe.requireAuth()) return;
+  currentUser = PlugMe.getUser();
+  renderSidebar();
+  await loadNotifications();
+  showPage('browse');
+  initSocket();
+});
+
+function renderSidebar() {
+  const u = currentUser;
+  document.getElementById('sidebarAvatar').textContent = u.name[0].toUpperCase();
+  document.getElementById('sidebarName').textContent = u.name;
+  const roleEl = document.getElementById('sidebarRole');
+  roleEl.textContent = u.role === 'student' ? 'Student' : 'Worker';
+  roleEl.className = 'user-role ' + u.role;
+  if (u.role === 'worker') {
+    document.getElementById('studentNav').style.display = 'none';
+    document.getElementById('workerNav').style.display = 'block';
+  }
+  document.getElementById('profileAvatar').textContent = u.name[0].toUpperCase();
+  document.getElementById('profileName').textContent = u.name;
+  document.getElementById('profileEmail').textContent = u.email;
+  if (u.rating > 0) document.getElementById('profileRating').textContent = '⭐ ' + u.rating.toFixed(1) + ' rating';
+  document.getElementById('profName').value = u.name;
+  document.getElementById('profPhone').value = u.phone || '';
+  document.getElementById('profBio').value = u.bio || '';
+  if (u.role === 'worker') {
+    document.getElementById('profSkillsWrap').style.display = 'block';
+    document.getElementById('profAvailWrap').style.display = 'block';
+    document.getElementById('profAvail').checked = u.isAvailable;
+    document.querySelectorAll('#profSkillsGrid .skill-chip').forEach(chip => {
+      if ((u.skills || []).includes(chip.dataset.skill)) chip.classList.add('selected');
+    });
+  }
+}
+
+// ── PAGE NAVIGATION ──────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  currentPage = name;
+  const titles = { browse:'Browse Jobs', postJob:'Post a Job', myJobs:'My Jobs', myOffers:'My Offers', workers:'Find Workers', chats:'Chats', notifications:'Notifications', profile:'Profile' };
+  document.getElementById('pageTitle').textContent = titles[name] || name;
+  const activeNav = document.getElementById('nav-' + name) || document.getElementById('nav-' + name + '-s') || document.getElementById('nav-' + name + '-w');
+  if (activeNav) activeNav.classList.add('active');
+  closeSidebar();
+  if (name === 'browse') loadJobs();
+  else if (name === 'myJobs') loadMyJobs();
+  else if (name === 'myOffers') loadMyOffers();
+  else if (name === 'workers') loadWorkers();
+  else if (name === 'chats') loadChats();
+  else if (name === 'notifications') loadNotifications(true);
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ── LOGOUT ───────────────────────────────────────────────────────────────────
+function logout() {
+  PlugMe.authAPI.logout();
+  window.location.href = 'login.html';
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span> ${msg}`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ── MODALS ───────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+});
+
+// ── JOBS ─────────────────────────────────────────────────────────────────────
+async function loadJobs() {
+  const grid = document.getElementById('browseJobsGrid');
+  grid.innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+  try {
+    const params = {};
+    const q = document.getElementById('jobSearchQ').value.trim();
+    const cat = document.getElementById('jobCatFilter').value;
+    if (q) params.q = q;
+    if (cat) params.category = cat;
+    const jobs = await PlugMe.jobsAPI.browse(params);
+    if (!jobs.length) { grid.innerHTML = emptyState('📋', 'No jobs found', 'Check back later or broaden your search.'); return; }
+    grid.innerHTML = jobs.map(j => jobCard(j, 'browse')).join('');
+  } catch (e) {
+    grid.innerHTML = emptyState('⚠️', 'Failed to load', e.message);
+  }
+}
+
+async function loadMyJobs() {
+  const grid = document.getElementById('myJobsGrid');
+  grid.innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+  try {
+    const jobs = await PlugMe.jobsAPI.myPosted();
+    if (!jobs.length) { grid.innerHTML = emptyState('📋', 'No jobs yet', 'Post your first job to get started!', 'Post a Job', () => showPage('postJob')); return; }
+    grid.innerHTML = jobs.map(j => jobCard(j, 'mine')).join('');
+  } catch (e) {
+    grid.innerHTML = emptyState('⚠️', 'Failed to load', e.message);
+  }
+}
+
+function jobCard(j, mode) {
+  const badgeClass = { open: 'badge-open', in_progress: 'badge-progress', completed: 'badge-completed', cancelled: 'badge-cancelled' }[j.status] || 'badge-open';
+  const badgeLabel = { open: 'Open', in_progress: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }[j.status] || j.status;
+  const catIcon = { tech:'💻', delivery:'🛵', laundry:'👕', food:'🍱', hair:'✂️', printing:'🖨️', tutoring:'📚', other:'⚡' }[j.category] || '📌';
+  const date = new Date(j.createdAt).toLocaleDateString('en-NG', { day:'numeric', month:'short' });
+
+  let footerHTML = '';
+  if (mode === 'browse' && currentUser.role === 'worker') {
+    footerHTML = `<div class="job-budget">₦${Number(j.budget).toLocaleString()}</div><button class="btn-sm green" onclick="openOfferModal('${j._id}','${j.title}',${j.budget})">Make Offer</button>`;
+  } else if (mode === 'browse' && currentUser.role === 'student') {
+    footerHTML = `<div class="job-budget">₦${Number(j.budget).toLocaleString()}</div><button class="btn-sm outline" onclick="viewJobDetail('${j._id}')">View</button>`;
+  } else if (mode === 'mine') {
+    const offerBtn = j.status === 'open' ? `<button class="btn-sm blue" onclick="viewOffersForJob('${j._id}')">Offers (${j.offerCount || 0})</button>` : '';
+    const completeBtn = j.status === 'in_progress' ? `<button class="btn-sm green" onclick="completeJob('${j._id}')">Mark Done</button>` : '';
+    const cancelBtn = j.status === 'open' ? `<button class="btn-sm danger" onclick="cancelJob('${j._id}')">Cancel</button>` : '';
+    footerHTML = `<div class="job-budget">₦${Number(j.budget).toLocaleString()}</div><div style="display:flex;gap:6px">${offerBtn}${completeBtn}${cancelBtn}</div>`;
+  }
+
+  return `<div class="job-card">
+    <div class="job-card-top">
+      <div class="job-title">${escHtml(j.title)}</div>
+      <span class="job-badge ${badgeClass}">${badgeLabel}</span>
+    </div>
+    <div class="job-desc">${escHtml(j.description)}</div>
+    <div class="job-meta">
+      <span>${catIcon} ${j.category || 'General'}</span>
+      <span>📍 ${escHtml(j.location || 'On Campus')}</span>
+      <span>🗓 ${date}</span>
+      ${j.student?.name ? `<span>👤 ${escHtml(j.student.name)}</span>` : ''}
+    </div>
+    <div class="job-footer">${footerHTML}</div>
+  </div>`;
+}
+
+function debounceJobs() {
+  clearTimeout(jobsDebounce);
+  jobsDebounce = setTimeout(loadJobs, 400);
+}
+
+async function postJob() {
+  const title = document.getElementById('pjTitle').value.trim();
+  const category = document.getElementById('pjCat').value;
+  const description = document.getElementById('pjDesc').value.trim();
+  const budget = document.getElementById('pjBudget').value;
+  const location = document.getElementById('pjLocation').value.trim();
+  if (!title || !category || !description || !budget) { toast('Please fill in all required fields', 'error'); return; }
+  const btn = document.getElementById('postJobBtn');
+  btn.disabled = true; btn.textContent = 'Posting…';
+  try {
+    await PlugMe.jobsAPI.post({ title, category, description, budget: Number(budget), location });
+    toast('Job posted successfully! 🎉');
+    document.getElementById('pjTitle').value = '';
+    document.getElementById('pjDesc').value = '';
+    document.getElementById('pjBudget').value = '';
+    document.getElementById('pjCat').value = '';
+    showPage('myJobs');
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Post Job';
+  }
+}
+
+async function completeJob(jobId) {
+  if (!confirm('Mark this job as completed?')) return;
+  try {
+    await PlugMe.jobsAPI.complete(jobId);
+    toast('Job marked complete! ✅');
+    loadMyJobs();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function cancelJob(jobId) {
+  if (!confirm('Cancel this job?')) return;
+  try {
+    await PlugMe.jobsAPI.cancel(jobId);
+    toast('Job cancelled.');
+    loadMyJobs();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function viewJobDetail(jobId) {
+  openModal('jobDetailModal');
+  document.getElementById('jobDetailBody').innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+  document.getElementById('jobDetailFooter').innerHTML = '';
+  try {
+    const j = await PlugMe.jobsAPI.get(jobId);
+    document.getElementById('jobDetailTitle').textContent = j.title;
+    const catIcon = { tech:'💻', delivery:'🛵', laundry:'👕', food:'🍱', hair:'✂️', printing:'🖨️', tutoring:'📚', other:'⚡' }[j.category] || '📌';
+    document.getElementById('jobDetailBody').innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        <span class="job-badge badge-open">${j.status}</span>
+        <span style="font-size:13px;color:var(--muted)">${catIcon} ${j.category}</span>
+        <span style="font-size:13px;color:var(--muted)">📍 ${escHtml(j.location)}</span>
+      </div>
+      <p style="font-size:15px;line-height:1.6;color:var(--text);margin-bottom:16px">${escHtml(j.description)}</p>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:var(--blue)">₦${Number(j.budget).toLocaleString()}</div>
+      ${j.student ? `<div style="margin-top:12px;font-size:13px;color:var(--muted)">Posted by <strong>${escHtml(j.student.name)}</strong> ⭐ ${j.student.rating || 0}</div>` : ''}
+    `;
+    if (currentUser.role === 'worker' && j.status === 'open') {
+      document.getElementById('jobDetailFooter').innerHTML = `<button class="btn-primary green" onclick="closeModal('jobDetailModal'); openOfferModal('${j._id}','${escHtml(j.title)}',${j.budget})">Make Offer</button>`;
+    }
+  } catch (e) {
+    document.getElementById('jobDetailBody').innerHTML = `<p style="color:var(--muted)">${e.message}</p>`;
+  }
+}
+
+// ── OFFERS ────────────────────────────────────────────────────────────────────
+function openOfferModal(jobId, jobTitle, budget) {
+  activeJobId = jobId;
+  document.getElementById('offerJobInfo').innerHTML = `<strong>${escHtml(jobTitle)}</strong><br>Student budget: <strong>₦${Number(budget).toLocaleString()}</strong>`;
+  document.getElementById('offerPrice').value = '';
+  document.getElementById('offerMessage').value = '';
+  document.getElementById('offerEta').value = '';
+  openModal('offerModal');
+}
+
+async function submitOffer() {
+  const price = document.getElementById('offerPrice').value;
+  const message = document.getElementById('offerMessage').value.trim();
+  const eta = document.getElementById('offerEta').value.trim();
+  if (!price) { toast('Enter your price', 'error'); return; }
+  const btn = document.getElementById('submitOfferBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    await PlugMe.offersAPI.submit(activeJobId, { price: Number(price), message, eta });
+    toast('Offer submitted! 🎉');
+    closeModal('offerModal');
+    loadJobs();
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit Offer';
+  }
+}
+
+async function viewOffersForJob(jobId) {
+  activeJobId = jobId;
+  openModal('offersModal');
+  document.getElementById('offersModalBody').innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+  try {
+    const offers = await PlugMe.offersAPI.getForJob(jobId);
+    if (!offers.length) {
+      document.getElementById('offersModalBody').innerHTML = '<div class="empty-state"><div class="empty-icon">📨</div><div class="empty-title">No offers yet</div><div class="empty-sub">Workers will see your job and make offers soon.</div></div>';
+      return;
+    }
+    document.getElementById('offersModalBody').innerHTML = offers.map(o => `
+      <div class="offer-card">
+        <div class="offer-header">
+          <div class="offer-avatar">${(o.worker?.name || 'W')[0].toUpperCase()}</div>
+          <div>
+            <div class="offer-name">${escHtml(o.worker?.name || 'Worker')}</div>
+            <div class="offer-rating">⭐ ${o.worker?.rating || 0} · ${(o.worker?.skills || []).slice(0,2).join(', ')}</div>
+          </div>
+          <div class="offer-price">₦${Number(o.price).toLocaleString()}</div>
+        </div>
+        ${o.message ? `<div class="offer-msg">"${escHtml(o.message)}"</div>` : ''}
+        ${o.eta ? `<div class="offer-eta">⏱ ${escHtml(o.eta)}</div>` : ''}
+        <div class="offer-actions">
+          ${o.status === 'pending' ? `
+            <button class="btn-sm green" onclick="acceptOffer('${jobId}','${o._id}')">Accept</button>
+            <button class="btn-sm danger" onclick="rejectOffer('${jobId}','${o._id}')">Decline</button>
+          ` : `<span class="job-badge ${o.status === 'accepted' ? 'badge-completed' : 'badge-cancelled'}">${o.status}</span>`}
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    document.getElementById('offersModalBody').innerHTML = `<p style="color:var(--muted)">${e.message}</p>`;
+  }
+}
+
+async function acceptOffer(jobId, offerId) {
+  if (!confirm('Accept this offer? All other offers will be declined.')) return;
+  try {
+    await PlugMe.offersAPI.accept(jobId, offerId);
+    toast('Offer accepted! Chat is now open. 🎉');
+    closeModal('offersModal');
+    loadMyJobs();
+    setTimeout(() => showPage('chats'), 1000);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function rejectOffer(jobId, offerId) {
+  try {
+    await PlugMe.offersAPI.reject(jobId, offerId);
+    toast('Offer declined.');
+    viewOffersForJob(jobId);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function loadMyOffers() {
+  const grid = document.getElementById('myOffersGrid');
+  grid.innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+  try {
+    const offers = await PlugMe.offersAPI.myOffers();
+    if (!offers.length) { grid.innerHTML = emptyState('📨', 'No offers yet', 'Browse jobs and make your first offer!', 'Browse Jobs', () => showPage('browse')); return; }
+    grid.innerHTML = offers.map(o => {
+      const statusBadge = { pending:'badge-open', accepted:'badge-completed', rejected:'badge-cancelled', withdrawn:'badge-cancelled' }[o.status] || 'badge-open';
+      return `<div class="job-card">
+        <div class="job-card-top">
+          <div class="job-title">${escHtml(o.job?.title || 'Job')}</div>
+          <span class="job-badge ${statusBadge}">${o.status}</span>
+        </div>
+        <div class="job-meta">
+          <span>📌 ${o.job?.category || '—'}</span>
+          <span>🗓 ${new Date(o.createdAt).toLocaleDateString('en-NG', { day:'numeric', month:'short' })}</span>
+        </div>
+        ${o.message ? `<div class="job-desc">"${escHtml(o.message)}"</div>` : ''}
+        <div class="job-footer">
+          <div class="job-budget green">₦${Number(o.price).toLocaleString()}</div>
+          ${o.status === 'accepted' && o.chatId ? `<button class="btn-sm blue" onclick="openChat('${o.chatId}')">Open Chat</button>` : ''}
+          ${o.status === 'pending' ? `<button class="btn-sm danger" onclick="withdrawOffer('${o._id}')">Withdraw</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    grid.innerHTML = emptyState('⚠️', 'Failed to load', e.message);
+  }
+}
+
+async function withdrawOffer(offerId) {
+  if (!confirm('Withdraw this offer?')) return;
+  try {
+    await PlugMe.offersAPI.withdraw(offerId);
+    toast('Offer withdrawn.');
+    loadMyOffers();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+// ── WORKERS ───────────────────────────────────────────────────────────────────
+async function loadWorkers() {
+  const grid = document.getElementById('workersGrid');
+  grid.innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+  try {
+    const params = {};
+    const q = document.getElementById('workerSearchQ').value.trim();
+    const skill = document.getElementById('workerSkillFilter').value;
+    if (q) params.q = q;
+    if (skill) params.skill = skill;
+    const workers = await PlugMe.usersAPI.workers(params);
+    if (!workers.length) { grid.innerHTML = emptyState('👥', 'No workers found', 'Try a different skill or search term.'); return; }
+    grid.innerHTML = workers.map(w => `
+      <div class="worker-card">
+        <div class="worker-avatar">${w.name[0].toUpperCase()}</div>
+        <div class="worker-name">${escHtml(w.name)}</div>
+        <div class="worker-rating">⭐ ${w.rating?.toFixed(1) || '0.0'} (${w.ratingCount || 0} reviews)</div>
+        <div class="worker-skills">
+          ${(w.skills || []).slice(0, 3).map(s => `<span class="skill-tag">${s}</span>`).join('')}
+        </div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:12px">
+          <span class="avail-dot ${w.isAvailable ? '' : 'offline'}"></span>
+          ${w.isAvailable ? 'Available' : 'Unavailable'}
+        </div>
+        <button class="btn-sm blue" style="width:100%" onclick="unlockContact('${w._id}','${escHtml(w.name)}')">View Contact</button>
+      </div>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = emptyState('⚠️', 'Failed to load', e.message);
+  }
+}
+
+function debounceWorkers() {
+  clearTimeout(workersDebounce);
+  workersDebounce = setTimeout(loadWorkers, 400);
+}
+
+async function unlockContact(workerId, workerName) {
+  try {
+    const status = await PlugMe.unlockAPI.status(workerId);
+    if (status.unlocked) {
+      alert(`📞 ${workerName}'s number: ${status.phone || 'Not set'}`);
+    } else {
+      if (confirm(`Unlock ${workerName}'s contact info?`)) {
+        const res = await PlugMe.unlockAPI.unlock(workerId);
+        alert(`📞 ${workerName}: ${res.phone || 'Not set'}`);
+        toast('Contact unlocked! 📞');
+      }
+    }
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+// ── CHATS ─────────────────────────────────────────────────────────────────────
+async function loadChats() {
+  const listEl = document.getElementById('chatListItems');
+  listEl.innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+  try {
+    const chats = await PlugMe.chatsAPI.list();
+    if (!chats.length) {
+      listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted); font-size:13px">No conversations yet.<br>Accept/get an offer to start chatting.</div>';
+      return;
+    }
+    listEl.innerHTML = chats.map(c => {
+      const other = (c.participants || []).find(p => p._id !== currentUser._id);
+      const initials = (other?.name || 'C')[0].toUpperCase();
+      return `<div class="chat-item ${activeChatId === c._id ? 'active' : ''}" onclick="openChat('${c._id}')">
+        <div class="chat-avatar">${initials}</div>
+        <div class="chat-item-info">
+          <div class="chat-item-name">${escHtml(other?.name || 'Chat')}</div>
+          <div class="chat-item-preview">${escHtml(c.lastMessage || 'No messages yet')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    listEl.innerHTML = `<div style="padding:20px; color:var(--muted); font-size:13px">${e.message}</div>`;
+  }
+}
+
+async function openChat(chatId) {
+  activeChatId = chatId;
+  const win = document.getElementById('chatWindow');
+  win.innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+  await PlugMe.socketHandlers.joinChat(chatId);
+  try {
+    const { chat, messages } = await PlugMe.chatsAPI.get(chatId);
+    const other = (chat.participants || []).find(p => p._id !== currentUser._id);
+    win.innerHTML = `
+      <div class="chat-window-header">
+        <div class="chat-avatar">${(other?.name || 'C')[0].toUpperCase()}</div>
+        <div>
+          <div class="chat-partner-name">${escHtml(other?.name || 'Chat')}</div>
+          <div class="chat-partner-sub">${escHtml(chat.job?.title || '')}</div>
+        </div>
+        ${chat.job?.status === 'in_progress' && currentUser.role === 'student' ? `<button class="btn-sm green" style="margin-left:auto" onclick="completeJobFromChat('${chat.job._id}')">Mark Done</button>` : ''}
+      </div>
+      <div class="messages-area" id="messagesArea"></div>
+      <div class="typing-indicator" id="typingIndicator"></div>
+      <div class="chat-input-bar">
+        <textarea class="chat-input" id="chatInput" placeholder="Type a message…" rows="1" onkeydown="handleChatKey(event,'${chatId}')"></textarea>
+        <button class="chat-send-btn" onclick="sendMessage('${chatId}')">➤</button>
+      </div>
+    `;
+    renderMessages(messages);
+    document.getElementById('chatInput').addEventListener('input', () => {
+      PlugMe.socketHandlers.sendTyping(chatId, currentUser.name);
+      clearTimeout(win._typingTimer);
+      win._typingTimer = setTimeout(() => PlugMe.socketHandlers.stopTyping(chatId), 1500);
+    });
+    loadChats(); // refresh list
+  } catch (e) {
+    win.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">⚠️</div><div>${e.message}</div></div>`;
+  }
+}
+
+function renderMessages(messages) {
+  const area = document.getElementById('messagesArea');
+  if (!area) return;
+  area.innerHTML = messages.map(m => {
+    if (m.isSystem) return `<div class="msg system"><div class="msg-bubble">${escHtml(m.text)}</div></div>`;
+    const mine = m.sender?._id === currentUser._id || String(m.sender) === String(currentUser._id);
+    const time = new Date(m.createdAt).toLocaleTimeString('en-NG', { hour:'2-digit', minute:'2-digit' });
+    return `<div class="msg ${mine ? 'mine' : 'theirs'}">
+      <div class="msg-bubble">${escHtml(m.text)}</div>
+      <div class="msg-time">${time}</div>
+    </div>`;
+  }).join('');
+  area.scrollTop = area.scrollHeight;
+}
+
+function appendMessage(msg) {
+  const area = document.getElementById('messagesArea');
+  if (!area) return;
+  if (msg.isSystem) {
+    area.insertAdjacentHTML('beforeend', `<div class="msg system"><div class="msg-bubble">${escHtml(msg.text)}</div></div>`);
+  } else {
+    const mine = msg.sender?._id === currentUser._id;
+    const time = new Date(msg.createdAt || Date.now()).toLocaleTimeString('en-NG', { hour:'2-digit', minute:'2-digit' });
+    area.insertAdjacentHTML('beforeend', `<div class="msg ${mine ? 'mine' : 'theirs'}">
+      <div class="msg-bubble">${escHtml(msg.text)}</div>
+      <div class="msg-time">${time}</div>
+    </div>`);
+  }
+  area.scrollTop = area.scrollHeight;
+}
+
+function handleChatKey(e, chatId) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(chatId); }
+}
+
+async function sendMessage(chatId) {
+  const input = document.getElementById('chatInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  try {
+    await PlugMe.chatsAPI.send(chatId, text);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function completeJobFromChat(jobId) {
+  if (!confirm('Mark this job as completed?')) return;
+  try {
+    await PlugMe.jobsAPI.complete(jobId);
+    toast('Job marked complete! ✅');
+    openChat(activeChatId);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function openChatFromOffer(chatId) {
+  showPage('chats');
+  setTimeout(() => openChat(chatId), 300);
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+async function loadNotifications(renderPage = false) {
+  try {
+    const notifs = await PlugMe.usersAPI.notifications();
+    const unread = notifs.filter(n => !n.isRead).length;
+    // badge
+    if (unread > 0) {
+      document.getElementById('notifDot').classList.add('show');
+      ['notifBadgeS','notifBadgeW'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.display = 'inline'; el.textContent = unread; }
+      });
+    }
+    // panel
+    const panelItems = document.getElementById('notifPanelItems');
+    if (panelItems) {
+      panelItems.innerHTML = notifs.length ? notifs.slice(0,15).map(n => `
+        <div class="notif-item ${n.isRead ? '' : 'unread'}">
+          <div class="notif-item-title">${escHtml(n.title)}</div>
+          <div class="notif-item-msg">${escHtml(n.message)}</div>
+          <div class="notif-item-time">${new Date(n.createdAt).toLocaleString('en-NG', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}</div>
+        </div>
+      `).join('') : '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No notifications</div>';
+    }
+    // full page
+    if (renderPage) {
+      const listEl = document.getElementById('notifList');
+      listEl.innerHTML = notifs.length ? notifs.map(n => `
+        <div class="notif-item ${n.isRead ? '' : 'unread'}" style="border-radius:var(--radius-sm);margin-bottom:8px;background:var(--surface);border:1px solid var(--border)">
+          <div class="notif-item-title">${escHtml(n.title)}</div>
+          <div class="notif-item-msg">${escHtml(n.message)}</div>
+          <div class="notif-item-time">${new Date(n.createdAt).toLocaleString('en-NG', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}</div>
+        </div>
+      `).join('') : emptyState('🔔', 'All caught up', 'No notifications yet.');
+    }
+  } catch {}
+}
+
+async function markAllRead() {
+  try {
+    await PlugMe.usersAPI.markNotificationsRead();
+    document.getElementById('notifDot').classList.remove('show');
+    ['notifBadgeS','notifBadgeW'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    toast('Marked all as read');
+    loadNotifications(currentPage === 'notifications');
+  } catch {}
+}
+
+function toggleNotifPanel() {
+  const panel = document.getElementById('notifPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) markAllRead();
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#notifPanel') && !e.target.closest('.notif-btn')) {
+    document.getElementById('notifPanel').classList.remove('open');
+  }
+});
+
+// ── PROFILE ───────────────────────────────────────────────────────────────────
+const profSkillsSelected = new Set(currentUser?.skills || []);
+function toggleProfSkill(el) {
+  const s = el.dataset.skill;
+  if (profSkillsSelected.has(s)) { profSkillsSelected.delete(s); el.classList.remove('selected'); }
+  else { profSkillsSelected.add(s); el.classList.add('selected'); }
+}
+
+async function saveProfile() {
+  const btn = document.getElementById('saveProfileBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const updates = {
+      name: document.getElementById('profName').value.trim(),
+      phone: document.getElementById('profPhone').value.trim(),
+      bio: document.getElementById('profBio').value.trim(),
+    };
+    if (currentUser.role === 'worker') {
+      updates.skills = [...profSkillsSelected];
+      updates.isAvailable = document.getElementById('profAvail').checked;
+    }
+    const updated = await PlugMe.usersAPI.updateProfile(updates);
+    PlugMe.saveAuth(PlugMe.getToken(), { ...currentUser, ...updated });
+    currentUser = { ...currentUser, ...updated };
+    toast('Profile updated! ✅');
+    document.getElementById('profileName').textContent = updated.name;
+    document.getElementById('sidebarName').textContent = updated.name;
+    document.getElementById('sidebarAvatar').textContent = updated.name[0].toUpperCase();
+    document.getElementById('profileAvatar').textContent = updated.name[0].toUpperCase();
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Save Changes'; }
+}
+
+// ── SOCKET EVENTS ─────────────────────────────────────────────────────────────
+async function initSocket() {
+  try {
+    await PlugMe.socketHandlers.onMessage(msg => {
+      if (currentPage === 'chats' && activeChatId && (msg.chat === activeChatId || msg.chat?._id === activeChatId)) {
+        appendMessage(msg);
+      }
+      loadChats();
+    });
+    await PlugMe.socketHandlers.onNotif(n => {
+      toast(n.title, 'info');
+      loadNotifications();
+    });
+    await PlugMe.socketHandlers.onOfferAccepted(data => {
+      toast('Your offer was accepted! 🎉', 'success');
+      loadMyOffers();
+    });
+    await PlugMe.socketHandlers.onTyping(({ userName }) => {
+      const el = document.getElementById('typingIndicator');
+      if (el) el.textContent = `${userName} is typing…`;
+    });
+    await PlugMe.socketHandlers.onStopTyping(() => {
+      const el = document.getElementById('typingIndicator');
+      if (el) el.textContent = '';
+    });
+  } catch {}
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function emptyState(icon, title, sub, btnLabel, btnFn) {
+  const btn = btnLabel ? `<button class="btn-sm blue" onclick="${btnFn.toString().replace(/"/g,"'")}()">${btnLabel}</button>` : '';
+  return `<div class="empty-state" style="grid-column:1/-1">
+    <div class="empty-icon">${icon}</div>
+    <div class="empty-title">${title}</div>
+    <div class="empty-sub">${sub}</div>
+    ${btnLabel ? `<button class="btn-sm blue" onclick="showPage('${btnLabel === 'Browse Jobs' ? 'browse' : 'postJob'}')">${btnLabel}</button>` : ''}
+  </div>`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — NSUK PlugMe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #2563eb; --blue-light: #dbeafe; --blue-dark: #1d4ed8;
+    --green: #16a34a; --green-light: #dcfce7; --green-dark: #15803d;
+    --gold: #d97706; --gold-light: #fef3c7;
+    --bg: #f8fafc; --surface: #ffffff;
+    --text: #0f172a; --muted: #64748b; --soft: #94a3b8;
+    --border: rgba(0,0,0,0.08); --dark: #0f172a;
+    --radius: 16px; --radius-sm: 10px; --radius-pill: 999px;
+  }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
+
+  .left-panel {
+    width: 40%; background: var(--dark); position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px 40px;
+  }
+  .left-panel::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 40%, rgba(22,163,74,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 70%, rgba(37,99,235,0.2) 0%, transparent 50%);
+  }
+  .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; }
+  .blob-1 { width: 280px; height: 280px; background: var(--green); top: -80px; left: -80px; }
+  .blob-2 { width: 220px; height: 220px; background: var(--blue); bottom: 40px; right: -60px; }
+
+  .panel-content { position: relative; z-index: 1; text-align: center; }
+  .logo-mark { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 40px; text-decoration: none; }
+  .logo-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; color: #fff; font-size: 18px;
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: #fff; }
+  .panel-headline { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 32px; color: #fff; line-height: 1.2; margin-bottom: 16px; }
+  .panel-headline span { color: var(--green); }
+  .panel-sub { color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; max-width: 280px; margin: 0 auto 36px; }
+
+  .benefit-list { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 14px; }
+  .benefit-list li { display: flex; align-items: flex-start; gap: 12px; color: rgba(255,255,255,0.7); font-size: 14px; }
+  .benefit-list li::before { content: '✓'; color: var(--green); font-weight: 700; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 48px 40px; overflow-y: auto; }
+  .form-box { width: 100%; max-width: 440px; }
+  .form-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px; color: var(--text); margin-bottom: 4px; }
+  .form-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .form-sub a { color: var(--blue); text-decoration: none; font-weight: 500; }
+
+  /* Role toggle */
+  .role-toggle { display: flex; gap: 0; margin-bottom: 24px; border: 1.5px solid var(--border); border-radius: var(--radius-pill); overflow: hidden; }
+  .role-btn {
+    flex: 1; padding: 11px 16px; border: none; background: transparent;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    color: var(--muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .role-btn.active-student { background: var(--blue); color: #fff; }
+  .role-btn.active-worker { background: var(--green); color: #fff; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 12px 16px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif; font-size: 15px;
+    color: var(--text); background: var(--surface); outline: none; transition: 0.2s;
+  }
+  .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+
+  /* Skills picker */
+  .skills-section { margin-bottom: 20px; display: none; }
+  .skills-section label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+  .skills-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-chip {
+    padding: 7px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-pill);
+    font-family: 'Outfit', sans-serif; font-size: 13px; color: var(--muted);
+    cursor: pointer; transition: 0.2s; user-select: none; background: var(--surface);
+  }
+  .skill-chip.selected { border-color: var(--green); background: var(--green-light); color: var(--green-dark); font-weight: 600; }
+
+  .btn-primary {
+    width: 100%; padding: 14px; background: var(--blue); color: #fff;
+    border: none; border-radius: var(--radius-pill); font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 8px;
+  }
+  .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(37,99,235,0.3); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn-primary.green { background: var(--green); }
+  .btn-primary.green:hover { background: var(--green-dark); box-shadow: 0 8px 24px rgba(22,163,74,0.3); }
+
+  .error-box {
+    background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm);
+    padding: 12px 16px; color: #dc2626; font-size: 14px; margin-bottom: 16px; display: none;
+  }
+
+  .terms-note { font-size: 12px; color: var(--soft); text-align: center; margin-top: 16px; line-height: 1.5; }
+
+  @media (max-width: 768px) {
+    .left-panel { display: none; }
+    .right-panel { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="panel-content">
+    <a href="index.html" class="logo-mark">
+      <div class="logo-icon">P</div>
+      <span class="logo-text">PlugMe</span>
+    </a>
+    <h1 class="panel-headline">Your campus,<br>your <span>hustle</span></h1>
+    <p class="panel-sub">Join hundreds of NSUK students and workers already on the platform.</p>
+    <ul class="benefit-list">
+      <li>Post jobs or find work in minutes</li>
+      <li>Verified campus community only</li>
+      <li>Secure chat before any transaction</li>
+      <li>Build your campus reputation fast</li>
+      <li>Earn real income within your school</li>
+    </ul>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="form-box">
+    <h2 class="form-title">Create account</h2>
+    <p class="form-sub">Already have one? <a href="login.html">Sign in</a></p>
+
+    <div class="role-toggle">
+      <button class="role-btn active-student" id="btnStudent" onclick="setRole('student')">🎓 I'm a Student</button>
+      <button class="role-btn" id="btnWorker" onclick="setRole('worker')">⚒️ I'm a Worker</button>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="name" placeholder="Covenant Olorunshola" autocomplete="name">
+    </div>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Phone number</label>
+      <input type="tel" id="phone" placeholder="08012345678" autocomplete="tel">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Min. 6 characters" autocomplete="new-password">
+    </div>
+
+    <div class="skills-section" id="skillsSection">
+      <label>What services do you offer? (pick all that apply)</label>
+      <div class="skills-grid" id="skillsGrid">
+        <span class="skill-chip" onclick="toggleSkill(this,'tech')">💻 Tech Help</span>
+        <span class="skill-chip" onclick="toggleSkill(this,'delivery')">🛵 Delivery</span>
+        <span class="skill-chip" onclick="toggleSkill(this,'laundry')">👕 Laundry</span>
+        <span class="skill-chip" onclick="toggleSkill(this,'food')">🍱 Food</span>
+        <span class="skill-chip" onclick="toggleSkill(this,'hair')">✂️ Hair</span>
+        <span class="skill-chip" onclick="toggleSkill(this,'printing')">🖨️ Printing</span>
+        <span class="skill-chip" onclick="toggleSkill(this,'tutoring')">📚 Tutoring</span>
+        <span class="skill-chip" onclick="toggleSkill(this,'other')">⚡ Other</span>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="regBtn" onclick="handleRegister()">Create account</button>
+    <p class="terms-note">By registering you agree to PlugMe's terms of service.<br>For NSUK students and workers only.</p>
+    <p style="text-align:center; margin-top:20px; font-size:13px; color:var(--soft);">
+      <a href="index.html" style="color:var(--muted); text-decoration:none;">← Back to homepage</a>
+    </p>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+  let currentRole = 'student';
+  const selectedSkills = new Set();
+
+  // Read ?role= from URL
+  window.addEventListener('load', () => {
+    if (window.PlugMe) PlugMe.redirectIfAuth();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('role') === 'worker') setRole('worker');
+  });
+
+  function setRole(role) {
+    currentRole = role;
+    const btnS = document.getElementById('btnStudent');
+    const btnW = document.getElementById('btnWorker');
+    const skillsSec = document.getElementById('skillsSection');
+    const regBtn = document.getElementById('regBtn');
+
+    if (role === 'student') {
+      btnS.className = 'role-btn active-student';
+      btnW.className = 'role-btn';
+      skillsSec.style.display = 'none';
+      regBtn.className = 'btn-primary';
+    } else {
+      btnW.className = 'role-btn active-worker';
+      btnS.className = 'role-btn';
+      skillsSec.style.display = 'block';
+      regBtn.className = 'btn-primary green';
+    }
+  }
+
+  function toggleSkill(el, skill) {
+    if (selectedSkills.has(skill)) {
+      selectedSkills.delete(skill);
+      el.classList.remove('selected');
+    } else {
+      selectedSkills.add(skill);
+      el.classList.add('selected');
+    }
+  }
+
+  async function handleRegister() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('regBtn');
+    const errBox = document.getElementById('errorBox');
+
+    errBox.style.display = 'none';
+    if (!name || !email || !password) { showError('Please fill in all required fields.'); return; }
+    if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+    try {
+      await PlugMe.authAPI.register({
+        name, email, phone, password,
+        role: currentRole,
+        skills: [...selectedSkills],
+      });
+      window.location.href = 'app.html';
+    } catch (e) {
+      showError(e.message);
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+    }
+  }
+
+  function showError(msg) {
+    const b = document.getElementById('errorBox');
+    b.textContent = msg;
+    b.style.display = 'block';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
+</script>
+</body>
+</html>

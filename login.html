@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — NSUK PlugMe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #2563eb; --blue-light: #dbeafe; --blue-dark: #1d4ed8;
+    --green: #16a34a; --green-light: #dcfce7;
+    --gold: #d97706; --gold-light: #fef3c7;
+    --bg: #f8fafc; --surface: #ffffff;
+    --text: #0f172a; --muted: #64748b; --soft: #94a3b8;
+    --border: rgba(0,0,0,0.08);
+    --dark: #0f172a;
+    --radius: 16px; --radius-sm: 10px; --radius-pill: 999px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.12);
+  }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
+
+  /* ── LEFT PANEL ─────────────────────────────────── */
+  .left-panel {
+    width: 45%; background: var(--dark); position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 60px 48px;
+  }
+  .left-panel::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(37,99,235,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(22,163,74,0.2) 0%, transparent 50%);
+  }
+  .blob {
+    position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15;
+  }
+  .blob-1 { width: 300px; height: 300px; background: var(--blue); top: -100px; right: -100px; }
+  .blob-2 { width: 200px; height: 200px; background: var(--green); bottom: 50px; left: -50px; }
+
+  .panel-content { position: relative; z-index: 1; text-align: center; }
+  .logo-mark {
+    display: inline-flex; align-items: center; gap: 10px; margin-bottom: 48px;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; color: #fff; font-size: 18px;
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: #fff; }
+  .panel-headline {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 36px;
+    color: #fff; line-height: 1.15; margin-bottom: 16px;
+  }
+  .panel-headline span { color: var(--blue); }
+  .panel-sub { color: rgba(255,255,255,0.55); font-size: 15px; line-height: 1.6; max-width: 300px; margin: 0 auto 40px; }
+
+  .stats-row { display: flex; gap: 24px; justify-content: center; }
+  .stat-chip {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-sm); padding: 12px 20px; text-align: center;
+  }
+  .stat-chip .val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: #fff; }
+  .stat-chip .lbl { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── RIGHT PANEL ─────────────────────────────────── */
+  .right-panel {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; padding: 60px 48px;
+  }
+  .form-box { width: 100%; max-width: 420px; }
+  .form-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: var(--text); margin-bottom: 6px; }
+  .form-sub { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
+  .form-sub a { color: var(--blue); text-decoration: none; font-weight: 500; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; letter-spacing: 0.2px; }
+  .field input {
+    width: 100%; padding: 13px 16px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif; font-size: 15px;
+    color: var(--text); background: var(--surface); outline: none; transition: 0.2s;
+  }
+  .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+
+  .btn-primary {
+    width: 100%; padding: 14px; background: var(--blue); color: #fff;
+    border: none; border-radius: var(--radius-pill); font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(37,99,235,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+  .divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+  .divider span { font-size: 12px; color: var(--soft); }
+
+  .btn-outline {
+    width: 100%; padding: 13px; background: transparent; color: var(--green);
+    border: 1.5px solid var(--green); border-radius: var(--radius-pill);
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
+    cursor: pointer; transition: 0.2s; text-decoration: none; display: block; text-align: center;
+  }
+  .btn-outline:hover { background: var(--green-light); }
+
+  .error-box {
+    background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm);
+    padding: 12px 16px; color: #dc2626; font-size: 14px; margin-bottom: 16px; display: none;
+  }
+
+  @media (max-width: 768px) {
+    .left-panel { display: none; }
+    .right-panel { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="panel-content">
+    <a href="index.html" class="logo-mark">
+      <div class="logo-icon">P</div>
+      <span class="logo-text">PlugMe</span>
+    </a>
+    <h1 class="panel-headline">Welcome<br>back to<br><span>PlugMe</span></h1>
+    <p class="panel-sub">The campus marketplace connecting NSUK students with skilled workers.</p>
+    <div class="stats-row">
+      <div class="stat-chip"><div class="val">500+</div><div class="lbl">Students</div></div>
+      <div class="stat-chip"><div class="val">200+</div><div class="lbl">Workers</div></div>
+      <div class="stat-chip"><div class="val">98%</div><div class="lbl">Success</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="form-box">
+    <h2 class="form-title">Sign in</h2>
+    <p class="form-sub">New here? <a href="register.html">Create a free account</a></p>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Sign in</button>
+
+    <div class="divider"><hr><span>or</span><hr></div>
+    <a href="register.html?role=worker" class="btn-outline">Join as a Campus Worker</a>
+
+    <p style="text-align:center; margin-top:24px; font-size:13px; color:var(--soft);">
+      <a href="index.html" style="color:var(--muted); text-decoration:none;">← Back to homepage</a>
+    </p>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+  // redirect if already logged in
+  window.addEventListener('load', () => { if (window.PlugMe) PlugMe.redirectIfAuth(); });
+
+  async function handleLogin() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('loginBtn');
+    const errBox = document.getElementById('errorBox');
+
+    errBox.style.display = 'none';
+    if (!email || !password) { showError('Please fill in all fields.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    try {
+      await PlugMe.authAPI.login({ email, password });
+      window.location.href = 'app.html';
+    } catch (e) {
+      showError(e.message);
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  }
+
+  function showError(msg) {
+    const b = document.getElementById('errorBox');
+    b.textContent = msg;
+    b.style.display = 'block';
+  }
+
+  // Enter key submits
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+</script>
+</body>
+</html>
