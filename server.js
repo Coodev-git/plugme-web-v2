@@ -558,7 +558,6 @@ mongoose.connect(process.env.MONGODB_URI)
     }
     server.listen(PORT, () => console.log(`PlugMe API running on port ${PORT}`));
   })
-  })
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
