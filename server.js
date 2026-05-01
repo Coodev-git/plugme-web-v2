@@ -55,7 +55,7 @@ const JobSchema = new mongoose.Schema({
   description:    { type: String, required: true },
   category:       { type: String, required: true },
   budget:         { type: Number, required: true },
-  location:       { type: String, default: 'On Campus' },
+  location:       { type: String, default: 'On Campus', index: false },
   status:         { type: String, enum: ['open','in_progress','completed','cancelled'], default: 'open' },
   agreedPrice:    { type: Number, default: null },
   offerCount:     { type: Number, default: 0 },
