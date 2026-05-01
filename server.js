@@ -547,10 +547,16 @@ app.get('/', (req, res) => res.json({ status: 'PlugMe API running', version: '1.
 
 // ── START ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
+.then(async () => {
     console.log('MongoDB connected');
+    try {
+      await mongoose.connection.db.collection('jobs').dropIndex('location_2dsphere');
+      console.log('Dropped geo index');
+    } catch (e) {
+      console.log('No geo index to drop');
+    }
     server.listen(PORT, () => console.log(`PlugMe API running on port ${PORT}`));
+  })
   })
   .catch(err => {
     console.error('MongoDB connection error:', err);
