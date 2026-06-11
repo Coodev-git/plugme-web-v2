@@ -2,7 +2,7 @@
 // All fetch calls use this file. Exported as window.PlugMe
 // Flat file — no subdirectory imports
 
-const BACKEND_URL = 'https://plugme-web-v2-production.up.railway.app';
+const BACKEND_URL = 'https://plugme-web-v2.onrender.com';
 
 // ── Token helpers ─────────────────────────────────────────────────────────────
 const getToken = () => localStorage.getItem('plugme_token');
