@@ -1,4 +1,5 @@
 require('dotenv').config();
+process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://covenantolorunshola_db_user:KVhU2RKpC0QoULgh@cluster0.nx1xb20.mongodb.net/plugme?retryWrites=true&w=majority&appName=Cluster0';
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
